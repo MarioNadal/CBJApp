@@ -1,6 +1,5 @@
 package com.iessanalberto.dam2.cbjapp.screens
-//TODO ARREGLAR CAMPO QUE ESTA EN DISABLED Y NO CAMBIA LA FECHA PERO EN REALIDAD SI
-//TODO CAMBIA DE PRESENTE A AUSENTE PERO NO RECARGA BIEN CON OTROS DATOS YA RECOGIDOS SI ESTA EN PRESEMTE UN DíA NO SE CAMBIA POR FECHA
+//TODO ARREGLAR CAMPO QUE  NO CAMBIA LA FECHA PERO EN REALIDAD SI
 
 
 import android.annotation.SuppressLint
@@ -17,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.IconButton
@@ -32,18 +32,20 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.Button
+import androidx.compose.material.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.sourceInformation
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -52,7 +54,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.iessanalberto.dam2.cbjapp.data.Asistencia
 import com.iessanalberto.dam2.cbjapp.viewmodels.PasarListaScreenViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.Calendar
@@ -68,6 +72,8 @@ fun PasarListaScreen(navController: NavController,
     var showEliminar by remember { mutableStateOf(false) }
     val pasarListaScreenUiState by viewModel.uiState.collectAsState()
     val jugadoresByGrupo by viewModel.getJugadoresByGrupo(equipo).collectAsState(initial = emptyList())
+    var verPrueba = remember { mutableStateOf(0)}
+
 
     val anio: Int
     val mes: Int
@@ -96,15 +102,15 @@ fun PasarListaScreen(navController: NavController,
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Cyan,
+                    containerColor = Color(0xFF023CBA),
                     titleContentColor = Color.Black)
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showDialog = true },
-                backgroundColor = MaterialTheme.colors.primary,
-                contentColor = MaterialTheme.colors.onPrimary
+                backgroundColor = Color(0xFF023CBA),
+                contentColor = Color(0xFF023CBA)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Agregar Jugador")
             }
@@ -122,40 +128,52 @@ fun PasarListaScreen(navController: NavController,
                     .padding(4.dp)
                     .clickable {
                         mDatePickerDialog.show()
+                        verPrueba.value = 0  //Forzar la recarga de JugadorItem que salgan bien las nuevas asistencias si esta presente o ausente
+                        println(viewModel.uiState.value.fechaSeleccionada.value)
                     })
-            TextField(value = viewModel.uiState.value.fechaSeleccionada.value,
-                onValueChange = {viewModel.uiState.value.fechaSeleccionada.value = it},
-                enabled = false)
-            LazyColumn {
-                items(jugadoresByGrupo) { jugador ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (showEliminar) {
-                            IconButton(onClick = { viewModel.deleteJugador(jugador) }) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Delete Jugador",
-                                    tint = Color.Red,
-                                    modifier = Modifier.padding(8.dp)
-                                )
-                            }
-                        }
-                                var asistencias by remember { mutableStateOf(emptyList<Asistencia>()) }
+            TextField(
+                value = viewModel.uiState.value.fechaSeleccionada.value,
+                onValueChange = { viewModel.uiState.value.fechaSeleccionada.value = it },
+                enabled = false
+            )
 
-                                LaunchedEffect(key1 = jugador.id) {
-                                    val asistenciasDeJugador = viewModel.getAsistencias(jugador.id)
-                                    asistencias = asistenciasDeJugador
+                LazyColumn {
+                    items(jugadoresByGrupo) { jugador ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (showEliminar) {
+                                IconButton(onClick = { viewModel.deleteJugador(jugador) }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Delete Jugador",
+                                        tint = Color.Red,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
                                 }
-
-                                JugadorItem(jugador = jugador, asistencias = asistencias, viewModel = viewModel)
                             }
+                            var asistencias by remember { mutableStateOf(emptyList<Asistencia>()) }
+
+                            LaunchedEffect(key1 = jugador.id) {
+                                val asistenciasDeJugador = viewModel.getAsistencias(jugador.id)
+                                asistencias = asistenciasDeJugador
+                            }
+
+                            JugadorItem(
+                                jugador = jugador,
+                                asistencias = asistencias,
+                                viewModel = viewModel,
+                                verPrueba
+                            )
+                        }
 
                     }
                 }
-            }
             Spacer(modifier = Modifier.height(40.dp))
-            Button(onClick = { showEliminar = !showEliminar }) {
+            Button(onClick = { showEliminar = !showEliminar },
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFE50000), // Cambia el color de fondo a rojo
+                    contentColor = Color.Black)) {
                 Text(text = "Eliminar Jugadores")
             }
+        }
         }
 
         if (showDialog) {
@@ -182,7 +200,7 @@ fun PasarListaScreen(navController: NavController,
                         label = { Text("Nombre del Jugador") }
                     )
                     Spacer(modifier = Modifier.height(20.dp))
-                    // Campo de entrada para el equipo del jugador
+                    // Campo de entrada para los apellidos del jugador
                     // Modifica este TextField según tus necesidades
                     Text("Apellidos:")
                     TextField(
@@ -214,22 +232,60 @@ fun PasarListaScreen(navController: NavController,
         }
     }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun JugadorItem(jugador: Jugador, asistencias: List<Asistencia>, viewModel: PasarListaScreenViewModel) {
-    // Obtener el estado de asistencia del jugador
-    val presente = remember { mutableStateOf(asistencias.any { it.jugadorId == jugador.id && it.fecha.equals(LocalDate.now()) && it.presente }) }
+fun JugadorItem(jugador: Jugador, asistencias: List<Asistencia>, viewModel: PasarListaScreenViewModel, verPrueba: MutableState<Int>) {
     val formato = SimpleDateFormat("yyyy-MM-dd")
 
-    // Composable para mostrar el nombre del jugador y su estado de asistencia
+    // Estado de asistencia del jugador
+    var asistencia: Asistencia? by remember { mutableStateOf(null) }
+
+    // Estado del jugador (Presente o Ausente)
+    var presente by remember { mutableStateOf(asistencia?.presente ?: false) }
+
+
+    LaunchedEffect(verPrueba.value) {
+        try {
+            withContext(Dispatchers.IO) {
+                if(asistencia==null){
+                    viewModel.insertAsistencia(jugador.id,
+                        formato.parse(viewModel.uiState.value.fechaSeleccionada.value),
+                        !presente)
+                }
+                asistencia = viewModel.getAsistenciaPorFecha(
+                    jugador.id,
+                    formato.parse(viewModel.uiState.value.fechaSeleccionada.value)
+                )
+            }
+        } catch (e: Exception) {
+            println("Error al coger la asistencia")
+        }
+    }
+
     Row(
         modifier = Modifier
             .clickable {
-                presente.value = !presente.value
-                viewModel.registrarAsistencia(jugador.id,formato.parse(viewModel.uiState.value.fechaSeleccionada.value), presente.value )}
+                presente = !presente
+                val nuevoPresente = !presente // Cambiar el valor de presente
+
+                // Crear una nueva instancia de Asistencia con el nuevo valor
+                val nuevaAsistencia = asistencia?.copy(presente = nuevoPresente)
+
+                // Actualizar la asistencia en el ViewModel
+                nuevaAsistencia?.let {
+                    viewModel.registrarAsistencia(
+                        jugadorId = jugador.id,
+                        fecha = formato.parse(viewModel.uiState.value.fechaSeleccionada.value),
+                        presente = it.presente
+                    )
+                }
+                verPrueba.value = 0
+            }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        verPrueba.value++
         Column(
             modifier = Modifier.weight(1f)
         ) {
@@ -238,19 +294,20 @@ fun JugadorItem(jugador: Jugador, asistencias: List<Asistencia>, viewModel: Pasa
                 style = MaterialTheme.typography.body1
             )
             Text(
-                text = if (presente.value) "Presente" else "Ausente",
+                text = if (asistencia?.presente == true) "Presente" else "Ausente",
                 style = MaterialTheme.typography.body2,
-                color = if (presente.value) Color.Green else Color.Red
+                color = if (asistencia?.presente == true) Color.Green else Color.Red
             )
         }
-        // Agregar un icono de check o cross para representar el estado de asistencia
+        // Icono para representar el estado de asistencia
         Icon(
-            imageVector = if (presente.value) Icons.Default.Check else Icons.Default.Close,
-            contentDescription = if (presente.value) "Presente" else "Ausente",
-            tint = if (presente.value) Color.Green else Color.Red
+            imageVector = if (asistencia?.presente == true) Icons.Default.Check else Icons.Default.Close,
+            contentDescription = if (asistencia?.presente == true) "Presente" else "Ausente",
+            tint = if (asistencia?.presente == true) Color.Green else Color.Red
         )
     }
 }
+
 
 
 
