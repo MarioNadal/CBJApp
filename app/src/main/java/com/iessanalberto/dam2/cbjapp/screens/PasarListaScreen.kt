@@ -42,6 +42,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.sourceInformation
 import androidx.compose.ui.Alignment
@@ -72,6 +73,9 @@ fun PasarListaScreen(navController: NavController,
     val jugadoresByGrupo by viewModel.getJugadoresByGrupo(equipo).collectAsState(initial = emptyList())
     var verPrueba = remember { mutableStateOf(0)}
 
+    var fecha: String by rememberSaveable { mutableStateOf(LocalDate.now().toString()) }
+
+
 
     val anio: Int
     val mes: Int
@@ -82,6 +86,7 @@ fun PasarListaScreen(navController: NavController,
     dia = mCalendar.get(Calendar.DAY_OF_MONTH)
     val mDatePickerDialog =
         DatePickerDialog(LocalContext.current, { DatePicker, anio: Int, mes: Int, dia: Int -> // Crear un objeto Date
+            fecha = "$dia/${mes+1}/$anio" // Almacenamos la fecha
             if (mes<10){
                 viewModel.onChanged(fechaSeleccionadaUi = mutableStateOf("$anio-0$mes-$dia"))
             }else{
@@ -127,13 +132,10 @@ fun PasarListaScreen(navController: NavController,
                     .clickable {
                         mDatePickerDialog.show()
                         verPrueba.value = 0  //Forzar la recarga de JugadorItem que salgan bien las nuevas asistencias si esta presente o ausente
-                        //Aqui se ve que se ha cabiado bien la fecha pero en el TextField sale la antigua
-                        println(viewModel.uiState.value.fechaSeleccionada.value)
                     })
             TextField(
-                //TODO ARREGLAR CAMPO QUE  NO CAMBIA LA FECHA PERO EN REALIDAD SI
-                value = viewModel.uiState.value.fechaSeleccionada.value,
-                onValueChange = { viewModel.uiState.value.fechaSeleccionada.value = it },
+                value = fecha,
+                onValueChange = { fecha = it },
                 enabled = false
             )
 
