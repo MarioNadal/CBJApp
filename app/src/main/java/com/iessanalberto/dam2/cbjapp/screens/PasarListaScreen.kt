@@ -1,6 +1,4 @@
 package com.iessanalberto.dam2.cbjapp.screens
-//TODO ARREGLAR CAMPO QUE  NO CAMBIA LA FECHA PERO EN REALIDAD SI
-
 
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
@@ -129,9 +127,11 @@ fun PasarListaScreen(navController: NavController,
                     .clickable {
                         mDatePickerDialog.show()
                         verPrueba.value = 0  //Forzar la recarga de JugadorItem que salgan bien las nuevas asistencias si esta presente o ausente
+                        //Aqui se ve que se ha cabiado bien la fecha pero en el TextField sale la antigua
                         println(viewModel.uiState.value.fechaSeleccionada.value)
                     })
             TextField(
+                //TODO ARREGLAR CAMPO QUE  NO CAMBIA LA FECHA PERO EN REALIDAD SI
                 value = viewModel.uiState.value.fechaSeleccionada.value,
                 onValueChange = { viewModel.uiState.value.fechaSeleccionada.value = it },
                 enabled = false
