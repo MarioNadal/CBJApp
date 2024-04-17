@@ -7,5 +7,5 @@ import java.time.ZoneId
 import java.util.Date
 
 data class PasarListaScreenUiState(
-    var fechaSeleccionada: MutableState<String> = mutableStateOf(LocalDate.now().toString())
+    var fechaSeleccionada: MutableState<String> = mutableStateOf(LocalDate.now().toString()),
 )

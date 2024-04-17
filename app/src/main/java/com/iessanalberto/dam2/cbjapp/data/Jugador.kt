@@ -33,5 +33,5 @@ data class Asistencia(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val jugadorId: Int,
     val fecha: Date,
-    val presente: Boolean
+    var presente: Boolean
 )

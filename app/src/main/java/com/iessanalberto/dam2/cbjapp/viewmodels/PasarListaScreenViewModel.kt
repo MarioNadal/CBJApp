@@ -61,6 +61,10 @@ class PasarListaScreenViewModel(application: Application) : AndroidViewModel(app
         return jugadorRepository.getAsistencias(jugadorId)
     }
 
+     suspend fun getAsistenciaPorFecha(jugadorId: Int, fecha: Date): Asistencia?{
+        return jugadorRepository.getAsistencia(jugadorId,fecha)
+    }
+
     suspend fun togglePlayerPresence(jugador: Jugador) {
         val jugadorId = jugador.id
         val fecha = Date() // Supongamos que la fecha es la fecha actual
@@ -93,12 +97,17 @@ class PasarListaScreenViewModel(application: Application) : AndroidViewModel(app
     fun registrarAsistencia(jugadorId: Int, fecha: Date, presente: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             val asistencia = jugadorRepository.getAsistencia(jugadorId, fecha)
+            println("ASISTENCIA: " + asistencia)
             if (asistencia == null) {
                 jugadorRepository.insertAsistencia(Asistencia(fecha = fecha, presente = presente, jugadorId = jugadorId))
             } else {
                 jugadorRepository.updateAsistencia(asistencia.copy(presente = presente))
             }
         }
+    }
+
+    suspend fun insertAsistencia(jugadorId: Int, fecha: Date, presente: Boolean){
+        jugadorRepository.insertAsistencia(Asistencia(fecha = fecha, presente = presente, jugadorId = jugadorId))
     }
 
 }
