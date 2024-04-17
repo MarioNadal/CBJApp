@@ -124,21 +124,28 @@ fun PasarListaScreen(navController: NavController,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(imageVector = Icons.Filled.DateRange,
-                contentDescription = "Elige fecha",
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(4.dp)
-                    .clickable {
-                        mDatePickerDialog.show()
-                        verPrueba.value = 0  //Forzar la recarga de JugadorItem que salgan bien las nuevas asistencias si esta presente o ausente
-                    })
-            TextField(
-                value = fecha,
-                onValueChange = { fecha = it },
-                enabled = false
-            )
-
+            Spacer(modifier = Modifier.height(80.dp))
+                Icon(imageVector = Icons.Filled.DateRange,
+                    contentDescription = "Elige fecha",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(4.dp)
+                        .clickable {
+                            mDatePickerDialog.show()
+                            verPrueba.value =
+                                0  //Forzar la recarga de JugadorItem que salgan bien las nuevas asistencias si esta presente o ausente
+                        })
+                TextField(
+                    value = fecha,
+                    onValueChange = { fecha = it },
+                    enabled = false
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(onClick = { showEliminar = !showEliminar },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFE50000), // Cambia el color de fondo a rojo
+                        contentColor = Color.Black)) {
+                    Text(text = "Eliminar Jugadores")
+                }
                 LazyColumn {
                     items(jugadoresByGrupo) { jugador ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -166,15 +173,10 @@ fun PasarListaScreen(navController: NavController,
                                 verPrueba
                             )
                         }
-
                     }
                 }
-            Spacer(modifier = Modifier.height(40.dp))
-            Button(onClick = { showEliminar = !showEliminar },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFE50000), // Cambia el color de fondo a rojo
-                    contentColor = Color.Black)) {
-                Text(text = "Eliminar Jugadores")
-            }
+
+
         }
         }
 
