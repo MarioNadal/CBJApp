@@ -12,10 +12,9 @@ import androidx.navigation.navArgument
 import com.example.loginfactoriaproyectos.navigation.AppScreens
 import com.example.loginfactoriaproyectos.viewmodels.LoginScreenUiState
 import com.example.loginfactoriaproyectos.viewmodels.LoginScreenViewModel
-import com.iessanalberto.dam2.cbjapp.screens.AlbertoHomeScreen
-import com.iessanalberto.dam2.cbjapp.screens.AlexHomeScreen
+import com.iessanalberto.dam2.cbjapp.screens.HomeScreen
 import com.iessanalberto.dam2.cbjapp.screens.LoginScreen
-import com.iessanalberto.dam2.cbjapp.screens.MarioHomeScreen
+
 import com.iessanalberto.dam2.cbjapp.screens.PasarListaScreen
 import com.iessanalberto.dam2.cbjapp.viewmodels.PasarListaScreenViewModel
 
@@ -31,9 +30,9 @@ fun AppNavigation() {
                 loginScreenViewModel = LoginScreenViewModel()
             )
         }
-        composable(route = AppScreens.AlbertoHomeScreen.route) { AlbertoHomeScreen(navController) }
-        composable(route = AppScreens.AlexHomeScreen.route) { AlexHomeScreen(navController) }
-        composable(route = AppScreens.MarioHomeScreen.route) { MarioHomeScreen(navController) }
+        composable(route = AppScreens.HomeScreen.route + "/{text}",
+            arguments = listOf(navArgument(name = "text") {type= NavType.StringType})
+        ){ it.arguments?.getString("text")?.let { it1 -> HomeScreen(navController, text = it1) } }
         composable(
             route = AppScreens.PasarListaScreen.route + "/{text}",
             arguments = listOf(navArgument(name = "text") { type = NavType.StringType })

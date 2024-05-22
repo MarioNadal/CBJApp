@@ -93,14 +93,8 @@ fun LoginScreenBodyContent(navController: NavController, loginScreenViewModel: L
                         loginScreenuiState.password
                     ).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
+                            navController.navigate(AppScreens.HomeScreen.route + "/" + loginScreenuiState.correo)
                             Toast.makeText(context, "Conectado", Toast.LENGTH_SHORT).show()
-                            if(loginScreenuiState.correo.equals("marionadalara@gmail.com")){
-                                navController.navigate(AppScreens.MarioHomeScreen.route)
-                            }else if (loginScreenuiState.correo.equals("alexmedinacbj12345@gmail.com")){
-                                navController.navigate(AppScreens.AlexHomeScreen.route)
-                            }else if (loginScreenuiState.correo.equals("albertomelendezcbj12345@gmail.com")){
-                                navController.navigate(AppScreens.AlbertoHomeScreen.route)
-                            }
                         } else {
                             Toast.makeText(context, "No ha ido bien", Toast.LENGTH_SHORT).show()
                         }
