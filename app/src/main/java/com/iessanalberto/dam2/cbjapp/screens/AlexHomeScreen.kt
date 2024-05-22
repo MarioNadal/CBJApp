@@ -17,12 +17,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.loginfactoriaproyectos.navigation.AppScreens
+import com.example.loginfactoriaproyectos.viewmodels.LoginScreenUiState
 import com.iessanalberto.dam2.cbjapp.R
 
 
 
 @Composable
-fun HomeScreen(navController: NavController){
+fun AlexHomeScreen(navController: NavController){
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -30,53 +31,49 @@ fun HomeScreen(navController: NavController){
     ) {
         Image(painter = painterResource(id = R.drawable.logocbj), contentDescription = "Logo CBJ")
         Spacer(modifier = Modifier.height(40.dp))
-        Button(onClick = {navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Infantil Femenino")},
+        Button(
+            onClick = { navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Cadete Femenino") },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color(0xFFFF9100), // Color naranja
                 contentColor = Color.Black // Color del texto
-            )) {
-            Text(text = "Infantil Femenino")
-        }
-        Button(onClick = {navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Infantil Masculino")},
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color(0xFFFF9100), // Color naranja
-                contentColor = Color.Black // Color del texto
-            )) {
-            Text(text = "Infantil Masculino")
-        }
-        Button(onClick = {navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Cadete Femenino")},
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color(0xFFFF9100), // Color naranja
-                contentColor = Color.Black // Color del texto
-            )) {
+            )
+        ) {
             Text(text = "Cadete Femenino")
         }
-        Button(onClick = {navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Cadete Masculino")},
+        Button(
+            onClick = { navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Cadete Masculino") },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color(0xFFFF9100), // Color naranja
                 contentColor = Color.Black // Color del texto
-            )) {
+            )
+        ) {
             Text(text = "Cadete Masculino")
         }
-        Button(onClick = {navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Junior Femenino")},
+        Button(
+            onClick = { navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Junior Femenino") },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color(0xFFFF9100), // Color naranja
                 contentColor = Color.Black // Color del texto
-            )) {
+            )
+        ) {
             Text(text = "Junior Femenino")
         }
-        Button(onClick = {navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Junior Masculino")},
+        Button(
+            onClick = { navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Junior Masculino") },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color(0xFFFF9100), // Color naranja
                 contentColor = Color.Black // Color del texto
-            )) {
+            )
+        ) {
             Text(text = "Junior Masculino")
         }
-        Button(onClick = {navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Senior Masculino")},
+        Button(
+            onClick = { navController.navigate(AppScreens.PasarListaScreen.route + "/" + "Senior Masculino") },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color(0xFFFF9100), // Color naranja
                 contentColor = Color.Black // Color del texto
-            )) {
+            )
+        ) {
             Text(text = "Senior Masculino")
         }
     }

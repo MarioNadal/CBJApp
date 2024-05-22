@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "544403128546",
+    "project_id": "cbjapp-98f60",
+    "storage_bucket": "cbjapp-98f60.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:544403128546:android:f9d3a5a272d60a07385ebb",
+        "android_client_info": {
+          "package_name": "com.iessanalberto.dam2.cbjapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJqNIZJ4qbyPVzIV1mg6frHu1nZIE5zZk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

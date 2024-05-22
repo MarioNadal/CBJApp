@@ -2,6 +2,7 @@ package com.iessanalberto.dam2.cbjapp.screens
 
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -142,7 +144,7 @@ fun PasarListaScreen(navController: NavController,
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(onClick = { showEliminar = !showEliminar },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFE50000), // Cambia el color de fondo a rojo
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red, // Cambia el color de fondo a rojo
                         contentColor = Color.Black)) {
                     Text(text = "Eliminar Jugadores")
                 }
@@ -183,6 +185,8 @@ fun PasarListaScreen(navController: NavController,
         if (showDialog) {
             val playerName = remember { mutableStateOf("") }
             val playerApellidos = remember { mutableStateOf("") }
+            val context = LocalContext.current
+
 
             Dialog(onDismissRequest = { "Nada" }) {
                 // Contenido del cuadro de diálogo para agregar jugador
@@ -195,10 +199,9 @@ fun PasarListaScreen(navController: NavController,
                     verticalArrangement = Arrangement.Center
                 ) {
                     // Aquí puedes agregar campos de entrada para el nombre y el equipo del jugador
-                    Text("Nombre:")
                     // Campo de entrada para el nombre del jugador
                     // Modifica este TextField según tus necesidades
-                    TextField(
+                    OutlinedTextField(
                         value = playerName.value,
                         onValueChange = { playerName.value = it },
                         label = { Text("Nombre del Jugador") }
@@ -206,8 +209,7 @@ fun PasarListaScreen(navController: NavController,
                     Spacer(modifier = Modifier.height(20.dp))
                     // Campo de entrada para los apellidos del jugador
                     // Modifica este TextField según tus necesidades
-                    Text("Apellidos:")
-                    TextField(
+                    OutlinedTextField(
                         value = playerApellidos.value,
                         onValueChange = { playerApellidos.value = it },
                         label = { Text("Apellidos del jugador") }
@@ -226,6 +228,8 @@ fun PasarListaScreen(navController: NavController,
                                 dateFormat.parse(viewModel.uiState.value.fechaSeleccionada.value)
                                     ?.let { it1 -> viewModel.insertJugador(jugador, date) }
                                 showDialog = false
+                            }else{
+                                Toast.makeText(context,"Debe rellenar ambos campos",Toast.LENGTH_SHORT).show()
                             }
                         }
                     ) {
@@ -241,6 +245,7 @@ fun PasarListaScreen(navController: NavController,
 @Composable
 fun JugadorItem(jugador: Jugador, asistencias: List<Asistencia>, viewModel: PasarListaScreenViewModel, verPrueba: MutableState<Int>) {
     val formato = SimpleDateFormat("yyyy-MM-dd")
+    val context = LocalContext.current
 
     // Estado de asistencia del jugador
     var asistencia: Asistencia? by remember { mutableStateOf(null) }
@@ -255,7 +260,7 @@ fun JugadorItem(jugador: Jugador, asistencias: List<Asistencia>, viewModel: Pasa
                 if(asistencia==null){
                     viewModel.insertAsistencia(jugador.id,
                         formato.parse(viewModel.uiState.value.fechaSeleccionada.value),
-                        !presente)
+                        presente = false)
                 }
                 asistencia = viewModel.getAsistenciaPorFecha(
                     jugador.id,
