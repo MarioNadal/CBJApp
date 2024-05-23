@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.Button
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -53,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.example.loginfactoriaproyectos.navigation.AppScreens
 import com.iessanalberto.dam2.cbjapp.data.Asistencia
 import com.iessanalberto.dam2.cbjapp.viewmodels.PasarListaScreenViewModel
 import kotlinx.coroutines.Dispatchers
@@ -104,6 +106,11 @@ fun PasarListaScreen(navController: NavController,
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically){
                         Text(text = equipo)
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigate(AppScreens.HomeScreen.route) }) {
+                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
