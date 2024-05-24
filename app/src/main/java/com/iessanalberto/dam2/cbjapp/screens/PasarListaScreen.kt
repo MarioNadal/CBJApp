@@ -355,6 +355,7 @@ fun JugadorItem(jugador: Jugador, viewModel: PasarListaScreenViewModel, verPrueb
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        verPrueba.value++
         Column(
             modifier = Modifier.weight(1f)
         ) {
