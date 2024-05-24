@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
@@ -32,7 +34,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.Button
+import androidx.compose.material.Colors
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -51,7 +56,10 @@ import androidx.compose.runtime.sourceInformation
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.loginfactoriaproyectos.navigation.AppScreens
@@ -72,6 +80,7 @@ fun PasarListaScreen(navController: NavController,
                    viewModel: PasarListaScreenViewModel,
                    equipo: String) {
     var showDialog by remember { mutableStateOf(false) }
+    var showDialogBorrado by remember { mutableStateOf(false) }
     var showEliminar by remember { mutableStateOf(false) }
     val pasarListaScreenUiState by viewModel.uiState.collectAsState()
     val jugadoresByGrupo by viewModel.getJugadoresByGrupo(equipo).collectAsState(initial = emptyList())
@@ -79,22 +88,20 @@ fun PasarListaScreen(navController: NavController,
 
     var fecha: String by rememberSaveable { mutableStateOf(LocalDate.now().toString()) }
 
-
-
     val anio: Int
     val mes: Int
     val dia: Int
     val mCalendar = Calendar.getInstance()
     anio = mCalendar.get(Calendar.YEAR)
-    mes = mCalendar.get(Calendar.MONTH)+1
+    mes = mCalendar.get(Calendar.MONTH)
     dia = mCalendar.get(Calendar.DAY_OF_MONTH)
     val mDatePickerDialog =
         DatePickerDialog(LocalContext.current, { DatePicker, anio: Int, mes: Int, dia: Int -> // Crear un objeto Date
             fecha = "$dia/${mes+1}/$anio" // Almacenamos la fecha
             if (mes<10){
-                viewModel.onChanged(fechaSeleccionadaUi = mutableStateOf("$anio-0$mes-$dia"))
+                viewModel.onChanged(fechaSeleccionadaUi = mutableStateOf("$anio-0$mes-$dia"), playerNameUi = pasarListaScreenUiState.playerName, pasarListaScreenUiState.playerApellidos)
             }else{
-                viewModel.onChanged(fechaSeleccionadaUi = mutableStateOf("$anio-$mes-$dia"))
+                viewModel.onChanged(fechaSeleccionadaUi = mutableStateOf("$anio-$mes-$dia"), playerNameUi = pasarListaScreenUiState.playerName, pasarListaScreenUiState.playerApellidos)
             }
         }, anio, mes, dia)
 
@@ -109,7 +116,7 @@ fun PasarListaScreen(navController: NavController,
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate(AppScreens.HomeScreen.route) }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
@@ -150,23 +157,58 @@ fun PasarListaScreen(navController: NavController,
                     enabled = false
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                Button(onClick = { showEliminar = !showEliminar },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red, // Cambia el color de fondo a rojo
-                        contentColor = Color.Black)) {
-                    Text(text = "Eliminar Jugadores")
+            if (jugadoresByGrupo.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("No hay jugadores en este equipo")
                 }
+            } else {
                 LazyColumn {
                     items(jugadoresByGrupo) { jugador ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (showEliminar) {
-                                IconButton(onClick = { viewModel.deleteJugador(jugador) }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Delete Jugador",
-                                        tint = Color.Red,
-                                        modifier = Modifier.padding(8.dp)
-                                    )
-                                }
+                            IconButton(onClick = { showDialogBorrado = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete Jugador",
+                                    tint = Color.Red,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                            if (showDialogBorrado) {
+                                AlertDialog(
+                                    onDismissRequest = { showDialogBorrado = false },
+                                    title = {
+                                        Text(
+                                            text = "Confirmar Borrado de Jugador",
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF6200EA)
+                                        )
+                                    },
+                                    text = {
+                                        Text(
+                                            "¿Estás seguro de que deseas borrar este jugador ${jugador.name + " " + jugador.apellidos}?",
+                                            fontSize = 16.sp,
+                                            color = Color.Gray
+                                        )
+                                    },
+                                    confirmButton = {
+                                        Button(onClick = {
+                                            viewModel.deleteJugador(jugador)
+                                            showDialogBorrado = false
+                                        }) {
+                                            Text("Confirmar", color = Color.White)
+                                        }
+                                    },
+                                    dismissButton = {
+                                        Button(onClick = { showDialogBorrado = false }) {
+                                            Text("Cancelar", color = Color.White)
+                                        }
+                                    }
+                                )
                             }
                             var asistencias by remember { mutableStateOf(emptyList<Asistencia>()) }
 
@@ -177,23 +219,18 @@ fun PasarListaScreen(navController: NavController,
 
                             JugadorItem(
                                 jugador = jugador,
-                                asistencias = asistencias,
                                 viewModel = viewModel,
                                 verPrueba
                             )
                         }
                     }
                 }
-
-
+            }
         }
         }
 
         if (showDialog) {
-            val playerName = remember { mutableStateOf("") }
-            val playerApellidos = remember { mutableStateOf("") }
             val context = LocalContext.current
-
 
             Dialog(onDismissRequest = { "Nada" }) {
                 // Contenido del cuadro de diálogo para agregar jugador
@@ -208,39 +245,57 @@ fun PasarListaScreen(navController: NavController,
                     // Aquí puedes agregar campos de entrada para el nombre y el equipo del jugador
                     // Campo de entrada para el nombre del jugador
                     // Modifica este TextField según tus necesidades
+                    Text(text = "Añade un nuevo jugador",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF6200EA))
+                    Spacer(modifier = Modifier.height(20.dp))
                     OutlinedTextField(
-                        value = playerName.value,
-                        onValueChange = { playerName.value = it },
+                        value = pasarListaScreenUiState.playerName.value,
+                        onValueChange = { viewModel.onChanged(fechaSeleccionadaUi = pasarListaScreenUiState.fechaSeleccionada, playerNameUi = mutableStateOf(it), pasarListaScreenUiState.playerApellidos)},
                         label = { Text("Nombre del Jugador") }
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                     // Campo de entrada para los apellidos del jugador
                     // Modifica este TextField según tus necesidades
                     OutlinedTextField(
-                        value = playerApellidos.value,
-                        onValueChange = { playerApellidos.value = it },
+                        value = pasarListaScreenUiState.playerApellidos.value,
+                        onValueChange = {viewModel.onChanged(fechaSeleccionadaUi = mutableStateOf("$anio-$mes-$dia"), playerNameUi = pasarListaScreenUiState.playerName, mutableStateOf(it))},
                         label = { Text("Apellidos del jugador") }
                     )
                     val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-                    // Botón para agregar el jugador
-                    Button(
-                        onClick = {
-                            val jugador = Jugador(
-                                name = playerName.value,
-                                apellidos = playerApellidos.value,
-                                equipo = equipo
-                            )
-                            if (playerName.value.isNotEmpty() && playerApellidos.value.isNotEmpty()) {
-                                var date = dateFormat.parse(viewModel.uiState.value.fechaSeleccionada.value)
-                                dateFormat.parse(viewModel.uiState.value.fechaSeleccionada.value)
-                                    ?.let { it1 -> viewModel.insertJugador(jugador, date) }
-                                showDialog = false
-                            }else{
-                                Toast.makeText(context,"Debe rellenar ambos campos",Toast.LENGTH_SHORT).show()
-                            }
+                    Row {
+                        // Botón para no añadir el jugador
+                        Button(onClick = {showDialog = false
+                            viewModel.onChanged(fechaSeleccionadaUi = mutableStateOf(viewModel.uiState.value.fechaSeleccionada.value), playerNameUi = mutableStateOf(""), mutableStateOf(""))}) {
+                            Text("Cancelar")
                         }
-                    ) {
-                        Text("Agregar")
+                        Spacer(modifier = Modifier.width(20.dp))
+                        // Botón para agregar el jugador
+                        Button(
+                            onClick = {
+                                val jugador = Jugador(
+                                    name = pasarListaScreenUiState.playerName.value,
+                                    apellidos = pasarListaScreenUiState.playerApellidos.value,
+                                    equipo = equipo
+                                )
+                                if (viewModel.anadirJugador() == 1) {
+                                    Toast.makeText(
+                                        context,
+                                        "Debe rellenar ambos campos",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }else {
+                                    var date = dateFormat.parse(viewModel.uiState.value.fechaSeleccionada.value)
+                                    dateFormat.parse(viewModel.uiState.value.fechaSeleccionada.value)
+                                        ?.let { it1 -> viewModel.insertJugador(jugador, date) }
+                                    showDialog = false
+                                    viewModel.onChanged(fechaSeleccionadaUi = mutableStateOf(viewModel.uiState.value.fechaSeleccionada.value), playerNameUi = mutableStateOf(""), mutableStateOf(""))
+                                }
+                            }
+                        ) {
+                            Text("Agregar")
+                        }
                     }
                 }
             }
@@ -250,58 +305,56 @@ fun PasarListaScreen(navController: NavController,
 @SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun JugadorItem(jugador: Jugador, asistencias: List<Asistencia>, viewModel: PasarListaScreenViewModel, verPrueba: MutableState<Int>) {
+
+fun JugadorItem(jugador: Jugador, viewModel: PasarListaScreenViewModel, verPrueba: MutableState<Int>) {
     val formato = SimpleDateFormat("yyyy-MM-dd")
     val context = LocalContext.current
 
-    // Estado de asistencia del jugador
+    // Estado de la asistencia del jugador para la fecha seleccionada
     var asistencia: Asistencia? by remember { mutableStateOf(null) }
 
-    // Estado del jugador (Presente o Ausente)
-    var presente by remember { mutableStateOf(asistencia?.presente ?: false) }
-
-
-    LaunchedEffect(verPrueba.value) {
+    LaunchedEffect(verPrueba.value, viewModel.uiState.value.fechaSeleccionada.value) {
         try {
             withContext(Dispatchers.IO) {
-                if(asistencia==null){
-                    viewModel.insertAsistencia(jugador.id,
-                        formato.parse(viewModel.uiState.value.fechaSeleccionada.value),
-                        presente = false)
-                }
+                // Obtener la asistencia del jugador para la fecha seleccionada
                 asistencia = viewModel.getAsistenciaPorFecha(
                     jugador.id,
                     formato.parse(viewModel.uiState.value.fechaSeleccionada.value)
                 )
+
+                // Si no hay asistencia para el jugador en la fecha seleccionada, crear una nueva asistencia
+                if (asistencia == null) {
+                    viewModel.registrarAsistencia(
+                        jugadorId = jugador.id,
+                        fecha = formato.parse(viewModel.uiState.value.fechaSeleccionada.value),
+                        presente = false // Por defecto, la nueva asistencia se establece como ausente
+                    )
+                    // Actualizar el estado de la asistencia después de la creación
+                    asistencia = Asistencia(jugadorId = jugador.id, fecha = formato.parse(viewModel.uiState.value.fechaSeleccionada.toString()), presente = false)
+                }
             }
         } catch (e: Exception) {
-            println("Error al coger la asistencia")
+            println("Error al obtener o crear la asistencia")
         }
     }
 
     Row(
         modifier = Modifier
             .clickable {
-                presente = !presente
-                val nuevoPresente = !presente // Cambiar el valor de presente
-
-                // Crear una nueva instancia de Asistencia con el nuevo valor
-                val nuevaAsistencia = asistencia?.copy(presente = nuevoPresente)
-
-                // Actualizar la asistencia en el ViewModel
-                nuevaAsistencia?.let {
+                // Si hay asistencia para el jugador en la fecha seleccionada, alternar el estado de presente
+                asistencia?.let { currentAsistencia ->
+                    val nuevoPresente = !currentAsistencia.presente
                     viewModel.registrarAsistencia(
                         jugadorId = jugador.id,
                         fecha = formato.parse(viewModel.uiState.value.fechaSeleccionada.value),
-                        presente = it.presente
+                        presente = nuevoPresente
                     )
                 }
-                verPrueba.value = 0
+                verPrueba.value++
             }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        verPrueba.value++
         Column(
             modifier = Modifier.weight(1f)
         ) {
@@ -309,6 +362,7 @@ fun JugadorItem(jugador: Jugador, asistencias: List<Asistencia>, viewModel: Pasa
                 text = "${jugador.name} ${jugador.apellidos}",
                 style = MaterialTheme.typography.body1
             )
+            // Si el jugador está ausente, mostrar un campo de entrada de texto para el comentario
             Text(
                 text = if (asistencia?.presente == true) "Presente" else "Ausente",
                 style = MaterialTheme.typography.body2,
@@ -323,7 +377,3 @@ fun JugadorItem(jugador: Jugador, asistencias: List<Asistencia>, viewModel: Pasa
         )
     }
 }
-
-
-
-

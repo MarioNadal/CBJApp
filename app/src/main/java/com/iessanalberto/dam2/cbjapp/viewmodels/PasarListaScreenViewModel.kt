@@ -2,6 +2,7 @@ package com.iessanalberto.dam2.cbjapp.viewmodels
 
 import android.app.Application
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.iessanalberto.dam2.cbjapp.data.Asistencia
@@ -24,9 +25,25 @@ class PasarListaScreenViewModel(application: Application) : AndroidViewModel(app
 
     private val jugadorRepository: JugadorRepository
 
-    fun onChanged(fechaSeleccionadaUi: MutableState<String>){
+    fun onChanged(fechaSeleccionadaUi: MutableState<String>, playerNameUi: MutableState<String>, playerApellidosUi: MutableState<String>){
         _uiState.update {
-                currentState -> currentState.copy(fechaSeleccionada = fechaSeleccionadaUi)
+                currentState -> currentState.copy(fechaSeleccionada = fechaSeleccionadaUi, playerNameUi, playerApellidosUi )
+        }
+    }
+
+    fun onChangeComentario(comentarioUi: MutableState<String>){
+        _uiState.update {
+                currentState -> currentState.copy(comentarios = comentarioUi)
+        }
+    }
+
+    fun anadirJugador(): Int{
+        //Campos en blanco
+        if(_uiState.value.playerName.value.isEmpty() || _uiState.value.playerApellidos.value.isEmpty()){
+            return 1
+        }
+        else{
+            return 2
         }
     }
 
@@ -65,7 +82,7 @@ class PasarListaScreenViewModel(application: Application) : AndroidViewModel(app
         return jugadorRepository.getAsistencia(jugadorId,fecha)
     }
 
-    suspend fun togglePlayerPresence(jugador: Jugador) {
+    suspend fun togglePlayerPresence(jugador: Jugador, comentario: String) {
         val jugadorId = jugador.id
         val fecha = Date() // Supongamos que la fecha es la fecha actual
 
@@ -94,10 +111,9 @@ class PasarListaScreenViewModel(application: Application) : AndroidViewModel(app
         }
     }
 
-    fun registrarAsistencia(jugadorId: Int, fecha: Date, presente: Boolean) {
+    fun registrarAsistencia(jugadorId: Int, fecha: Date, presente: Boolean, comentario: String = "") {
         viewModelScope.launch(Dispatchers.IO) {
             val asistencia = jugadorRepository.getAsistencia(jugadorId, fecha)
-            println("ASISTENCIA: " + asistencia)
             if (asistencia == null) {
                 jugadorRepository.insertAsistencia(Asistencia(fecha = fecha, presente = presente, jugadorId = jugadorId))
             } else {
@@ -106,7 +122,7 @@ class PasarListaScreenViewModel(application: Application) : AndroidViewModel(app
         }
     }
 
-    suspend fun insertAsistencia(jugadorId: Int, fecha: Date, presente: Boolean){
+    suspend fun insertAsistencia(jugadorId: Int, fecha: Date, presente: Boolean, comentario: String = "") {
         jugadorRepository.insertAsistencia(Asistencia(fecha = fecha, presente = presente, jugadorId = jugadorId))
     }
 

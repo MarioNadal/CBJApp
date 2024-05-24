@@ -8,4 +8,7 @@ import java.util.Date
 
 data class PasarListaScreenUiState(
     var fechaSeleccionada: MutableState<String> = mutableStateOf(LocalDate.now().toString()),
+    var playerName: MutableState<String> = mutableStateOf(""),
+    var playerApellidos: MutableState<String> = mutableStateOf(""),
+    var comentarios: MutableState<String> = mutableStateOf(""),
 )

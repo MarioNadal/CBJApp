@@ -4,12 +4,10 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -26,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -83,27 +80,29 @@ fun LoginScreenBodyContent(navController: NavController, loginScreenViewModel: L
             }
             )
         Spacer(modifier = Modifier.height(20.dp))
-        //Poner sign out o no se que pasa
-        //Documentar con diagramas UML
         Button(onClick = {
-            if(loginScreenuiState.correo.contains("@")){
-                if(loginScreenuiState.password.length>=9&&loginScreenuiState.password.length<=30) {
-                    auth.signInWithEmailAndPassword(
-                        loginScreenuiState.correo,
-                        loginScreenuiState.password
-                    ).addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            navController.navigate(AppScreens.HomeScreen.route + "/" + loginScreenuiState.correo)
-                            Toast.makeText(context, "Conectado", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "No ha ido bien", Toast.LENGTH_SHORT).show()
-                        }
+            if(loginScreenViewModel.validarCorreoContrasena() == 1) {
+                Toast.makeText(context, "Ambos campos deben estar rellenados", Toast.LENGTH_SHORT).show()
+            }else if(loginScreenViewModel.validarCorreoContrasena() == 2) {
+                Toast.makeText(context, "El correo debe contener un @", Toast.LENGTH_SHORT).show()
+            }else if(loginScreenViewModel.validarCorreoContrasena() == 3){
+                Toast.makeText(context,"La contraseña debe tener entre 9 y 30 carácteres", Toast.LENGTH_SHORT).show()
+            }else if(loginScreenViewModel.validarCorreoContrasena() == 4){
+                Toast.makeText(context, "La contraseña no contiene un simbolo (@,#,$,% o &)", Toast.LENGTH_SHORT).show()            }else if(loginScreenViewModel.validarCorreoContrasena() == 5){
+            }else if(loginScreenViewModel.validarCorreoContrasena() == 5){
+                Toast.makeText(context, "La contraseña debe tener una mayuscula, una minuscula y un número", Toast.LENGTH_SHORT).show()            }
+            else {
+                auth.signInWithEmailAndPassword(
+                    loginScreenuiState.correo,
+                    loginScreenuiState.password
+                ).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        navController.navigate(AppScreens.HomeScreen.route + "/" + loginScreenuiState.correo)
+                        Toast.makeText(context, "Conectado", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "No ha ido bien", Toast.LENGTH_SHORT).show()
                     }
-                }else{
-                    Toast.makeText(context,"La contraseña debe tener entre 9 y 30 carácteres", Toast.LENGTH_SHORT).show()
                 }
-            }else{
-                Toast.makeText(context,"El correo debe contener un @", Toast.LENGTH_SHORT).show()
             }
         }) {
             Text(text = "Acceder")
